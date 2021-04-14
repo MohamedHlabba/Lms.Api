@@ -13,6 +13,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Lms.Api.Data;
+using Lms.Core.Repositories;
+using Lms.Data.Repositories;
 
 namespace Lms.Api
 {
@@ -29,9 +31,11 @@ namespace Lms.Api
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers(opt=>opt.ReturnHttpNotAcceptable=true)
-            .AddNewtonsoftJson()
+            services.AddControllers(opt => opt.ReturnHttpNotAcceptable = true)
+            .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddXmlDataContractSerializerFormatters();
+            //services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize);
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lms.Api", Version = "v1" });
@@ -39,6 +43,7 @@ namespace Lms.Api
 
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ApplicationDbContext")));
+            services.AddScoped<IUnitOfwork, UnitOfWork>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

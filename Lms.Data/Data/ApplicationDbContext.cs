@@ -13,8 +13,15 @@ namespace Lms.Api.Data
             : base(options)
         {
         }
+        //protected override void OnModelCreating(ModelBuilder builder)
+        //{
+        //    base.OnModelCreating(builder);
 
-        public DbSet<Course> Courses{ get; set; }
+        //    //builder.Entity<Module>().HasKey(m => new { m.CourseId, m.Id});
+        //    builder.Entity<Course>().HasKey(c => new { c.Id, c.Modules });
+        //}
+
+        public DbSet<Course> Courses { get; set; }
         public DbSet<Module> Modules { get; set; }
     }
 }
