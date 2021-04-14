@@ -23,10 +23,11 @@ namespace Lms.Data.Repositories
           await  db.AddAsync(added);
         }
 
-        public async Task<IEnumerable<Course>> GetAllCourses()
+        public async Task<IEnumerable<Course>> GetAllCourses(bool includeModules)
         {
-            return await db.Courses
-                   .Include(c => c.Modules).ToListAsync();
+            return includeModules ? await db.Courses
+                   .Include(c => c.Modules).ToListAsync() : 
+                   await db.Courses.ToListAsync();
         }
 
         public async Task<Course> GetCourse(int? id)

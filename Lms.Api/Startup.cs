@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Lms.Api.Data;
 using Lms.Core.Repositories;
 using Lms.Data.Repositories;
+using Lms.Data;
 
 namespace Lms.Api
 {
@@ -44,6 +45,7 @@ namespace Lms.Api
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("ApplicationDbContext")));
             services.AddScoped<IUnitOfwork, UnitOfWork>();
+            services.AddAutoMapper(typeof(MapperProfile));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

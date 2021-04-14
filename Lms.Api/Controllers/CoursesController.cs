@@ -9,6 +9,8 @@ using Lms.Api.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using Lms.Data.Repositories;
+using AutoMapper;
+using Lms.Core.Dto;
 
 namespace Lms.Api.Controllers
 {
@@ -17,19 +19,23 @@ namespace Lms.Api.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ICourseRepository repo;
-        public CoursesController(ApplicationDbContext context ,ICourseRepository repo)
+        private readonly IUnitOfwork uofwork;
+        private readonly IMapper mapper;
+
+        public CoursesController(ApplicationDbContext context , IUnitOfwork uofwork , IMapper mapper)
         {
             _context = context;
-            this.repo = repo;
+            this.uofwork = uofwork;
+            this.mapper = mapper;
         }
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Course>>> GetAllCourses()
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(bool includeModules = false)
         {
-            var res = await repo.GetAllCourses();
-            return Ok(res);
+            var res = await uofwork.CourseRepository.GetAllCourses(includeModules);
+            var courseDto = mapper.Map<IEnumerable<CourseDto>>(res);
+            return Ok(courseDto);
         }
 
         // GET: api/Courses/5
@@ -82,7 +88,7 @@ namespace Lms.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
-            if (await repo.GetCourse(course.Id) != null)
+            if (await uofwork.CourseRepository.GetCourse(course.Id) != null)
             {
                 ModelState.AddModelError("Id", "Id in use");
                 return BadRequest(ModelState);
