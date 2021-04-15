@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Lms.Data.Migrations
 {
-    public partial class genereatedett : Migration
+    public partial class idenbtity : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -23,6 +23,16 @@ namespace Lms.Data.Repositories
           await  db.AddAsync(added);
         }
 
+        public  bool CourseExists(int id)
+        {
+            return db.Courses.Any(c=>c.Id==id);  
+        }
+
+        public void DeleteAsync<T>(T removed)
+        {
+            db.Remove(removed);
+        }
+
         public async Task<IEnumerable<Course>> GetAllCourses(bool includeModules)
         {
             return includeModules ? await db.Courses

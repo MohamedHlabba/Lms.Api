@@ -11,6 +11,7 @@ using Lms.Core.Repositories;
 using Lms.Data.Repositories;
 using AutoMapper;
 using Lms.Core.Dto;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Lms.Api.Controllers
 {
@@ -56,32 +57,24 @@ namespace Lms.Api.Controllers
         // PUT: api/Courses/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCourse(int id, Course course)
+        public async Task<IActionResult> PutCourse(int id, CourseDto dto)
         {
-            if (id != course.Id)
-            {
-                return BadRequest();
-            }
+            var course = await uofwork.CourseRepository.GetCourse(id, false);
 
-            _context.Entry(course).State = EntityState.Modified;
+            if (course is null) return StatusCode(StatusCodes.Status404NotFound);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            mapper.Map(dto, course);
 
-            return NoContent();
+            // repo.Update(eventday);
+            if (await uofwork.CourseRepository.SaveAsync())
+            {
+                return Ok(mapper.Map<CourseDto>(course));
+           // return NoContent();
+            }
+            else
+            {
+                return StatusCode(500);
+            }
         }
 
         // POST: api/Courses
@@ -112,21 +105,43 @@ namespace Lms.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
+            var course = await uofwork.CourseRepository.GetCourse(id,false);
             if (course == null)
             {
                 return NotFound();
             }
 
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-
+            uofwork.CourseRepository.DeleteAsync(course);
+            await uofwork.CompleteAsync();
             return NoContent();
         }
 
         private bool CourseExists(int id)
         {
-            return _context.Courses.Any(e => e.Id == id);
+            return uofwork.CourseRepository.CourseExists(id);
+        }
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<CourseDto>> PatchECourse(int id, JsonPatchDocument<CourseDto> patchDocument)
+        {
+
+            var course = await uofwork.CourseRepository.GetCourse(id, true);
+
+            if (course is null) return NotFound();
+
+            var dto = mapper.Map<CourseDto>(course);
+
+            patchDocument.ApplyTo(dto, ModelState);
+
+            if (!TryValidateModel(dto))
+                return BadRequest(ModelState);
+
+            mapper.Map(dto, course);
+
+            if (await uofwork.CourseRepository.SaveAsync())
+                return Ok(mapper.Map<CourseDto>(course));
+            else
+                return StatusCode(500);
+
         }
     }
 }

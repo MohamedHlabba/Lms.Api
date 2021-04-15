@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lms.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210414235719_genereatedett")]
-    partial class genereatedett
+    [Migration("20210415113111_idenbtity")]
+    partial class idenbtity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

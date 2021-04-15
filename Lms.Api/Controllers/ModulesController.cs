@@ -9,6 +9,8 @@ using Lms.Api.Data;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using Lms.Data.Repositories;
+using Lms.Core.Dto;
+using AutoMapper;
 
 namespace Lms.Api.Controllers
 {
@@ -17,96 +19,118 @@ namespace Lms.Api.Controllers
     public class ModulesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IModuleRepository repo;
-        public ModulesController(ApplicationDbContext context, IModuleRepository repo)
+        private readonly IUnitOfwork uOfwork;
+        private readonly IMapper mapper;
+
+        public ModulesController(ApplicationDbContext context, IUnitOfwork uOfwork, IMapper mapper)
         {
             _context = context;
-            this.repo = repo;
+            this.uOfwork = uOfwork;
+            this.mapper = mapper;
         }
 
         // GET: api/Modules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Module>>> GetAllModules()
+        public async Task<ActionResult<IEnumerable<ModuleDto>>> GetAllModules()
         {
-            var res = await repo.GetAllModules();
-            return Ok(res);
+            var modules = await uOfwork.ModuleRepository.GetAllModules();
+            var moduleDto = mapper.Map<IEnumerable<ModuleDto>>(modules);
+            return Ok(moduleDto);
         }
 
-        // GET: api/Modules/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Module>> GetModule(int id)
+       // GET: api/Modules/5
+        [HttpGet("{title}")]
+        public async Task<ActionResult<ModuleDto>> GetModule(string title)
         {
-            var module = await _context.Modules.FindAsync(id);
+            if (string.IsNullOrEmpty(title)) return BadRequest();
 
-            if (module == null)
-            {
-                return NotFound();
-            }
+            var result = await uOfwork.ModuleRepository.GetModule(title);
 
-            return module;
+            if (result is null) return NotFound();
+
+            var dto = mapper.Map<ModuleDto>(result);
+
+            return Ok(dto);
         }
+        //[HttpGet("{title}")]
+        //public ActionResult<ModuleDto> GettModuleForCourse(int id, string title)
+        //{
+        //    if (!uOfwork.CourseRepository.CourseExists(id))
+        //    {
+        //        return StatusCode(404);
+        //    }
+        //    var ModuleForCourseFromRepo = uOfwork.ModuleRepository.GetModuleForCourse(id,title);
+        //    if (ModuleForCourseFromRepo is null)
+        //    {
+
+        //        return StatusCode(404);
+        //    }
+        //    return Ok(mapper.Map<ModuleDto>(ModuleForCourseFromRepo));
+        //}
 
         // PUT: api/Modules/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutModule(int id, Module module)
+        [HttpPut("{title}")]
+        public async Task<IActionResult> PutModule(string title, ModuleDto dto)
         {
-            if (id != module.Id)
+            var module =await uOfwork.ModuleRepository.GetModule(title);
+            if (module is null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(module).State = EntityState.Modified;
-
-            try
+            mapper.Map(dto, module);
+            if (await uOfwork.ModuleRepository.SaveAsync())
             {
-                await _context.SaveChangesAsync();
+                return Ok(mapper.Map<ModuleDto>(module));
             }
-            catch (DbUpdateConcurrencyException)
+            else
             {
-                if (!ModuleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500);
             }
-
-            return NoContent();
         }
 
         // POST: api/Modules
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Module>> PostModule(Module module)
+        public async Task<ActionResult<ModuleDto>> PostModule(ModuleDto dto)
         {
-            _context.Modules.Add(module);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetModule", new { id = module.Id }, module);
+            if (await uOfwork.ModuleRepository.GetModule(dto.Title) != null)
+            {
+                ModelState.AddModelError("Title", "Module is  in use");
+                return BadRequest(ModelState);
+            }
+            var module = mapper.Map<Module>(dto);
+            await uOfwork.ModuleRepository.AddAsync(module);
+            if (await uOfwork.ModuleRepository.SaveAsync())
+            {
+                var model = mapper.Map<ModuleDto>(module);
+                return CreatedAtAction(nameof(GetModule), new { courseId=model.CourseId, title = model.Title }, model);
+            }
+            else
+            {
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
 
         // DELETE: api/Modules/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteModule(int id)
+        [HttpDelete("{title}")]
+        public async Task<IActionResult> DeleteModule(string title)
         {
-            var module = await _context.Modules.FindAsync(id);
+            var module = await uOfwork.ModuleRepository.GetModule(title);
             if (module == null)
             {
                 return NotFound();
             }
 
-            _context.Modules.Remove(module);
-            await _context.SaveChangesAsync();
-
+            uOfwork.ModuleRepository.DeleteAsync(module);
+            await uOfwork.CompleteAsync();
             return NoContent();
         }
 
         private bool ModuleExists(int id)
         {
-            return _context.Modules.Any(e => e.Id == id);
+            return uOfwork.ModuleRepository.ModuleExists(id);
         }
     }
 }
