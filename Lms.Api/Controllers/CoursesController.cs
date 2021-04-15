@@ -22,7 +22,7 @@ namespace Lms.Api.Controllers
         private readonly IUnitOfwork uofwork;
         private readonly IMapper mapper;
 
-        public CoursesController(ApplicationDbContext context , IUnitOfwork uofwork , IMapper mapper)
+        public CoursesController(ApplicationDbContext context, IUnitOfwork uofwork, IMapper mapper)
         {
             _context = context;
             this.uofwork = uofwork;
@@ -40,16 +40,17 @@ namespace Lms.Api.Controllers
 
         // GET: api/Courses/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Course>> GetCourse(int id)
+        public async Task<ActionResult<CourseDto>> GetCourse(int id, bool includeModules = false)
         {
-            var course = await _context.Courses.FindAsync(id);
+            if (string.IsNullOrEmpty(id.ToString())) return BadRequest();
 
-            if (course == null)
-            {
-                return NotFound();
-            }
+            var result = await uofwork.CourseRepository.GetCourse(id, includeModules);
 
-            return course;
+            if (result is null) return NotFound();
+
+            var dto = mapper.Map<CourseDto>(result);
+
+            return Ok(dto);
         }
 
         // PUT: api/Courses/5
@@ -86,17 +87,25 @@ namespace Lms.Api.Controllers
         // POST: api/Courses
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Course>> PostCourse(Course course)
+        public async Task<ActionResult<CourseDto>> PostCourse(CourseDto dto)
         {
-            if (await uofwork.CourseRepository.GetCourse(course.Id) != null)
+            if (await uofwork.CourseRepository.GetCourse(dto.Id,false) != null)
             {
-                ModelState.AddModelError("Id", "Id in use");
+                ModelState.AddModelError("Title", "Course is  in use");
                 return BadRequest(ModelState);
             }
-            _context.Courses.Add(course);
-            await _context.SaveChangesAsync();
+            var course = mapper.Map<Course>(dto);
+            await uofwork.CourseRepository.AddAsync(course);
+            if (await uofwork.CourseRepository.SaveAsync())
+            {
+                var model = mapper.Map<CourseDto>(course);
+                return CreatedAtAction(nameof(GetCourse), new { id = model.Id }, model);
+            }
+            else
+            {
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
 
-            return CreatedAtAction(nameof(GetCourse), new { id = course.Id }, course);
         }
 
         // DELETE: api/Courses/5

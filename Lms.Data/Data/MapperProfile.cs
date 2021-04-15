@@ -13,8 +13,9 @@ namespace Lms.Data
     {
         public MapperProfile()
         {
-            CreateMap<Course, CourseDto>().ForMember(dest => dest.EndDate,
-                  from => from.MapFrom(c => c.StartDate.AddMonths(3))).ReverseMap();
+            //CreateMap<Course, CourseDto>().ForMember(dest => dest.EndDate,
+            //      from => from.MapFrom(c => c.StartDate.AddMonths(3)));
+            CreateMap<Course, CourseDto>().ReverseMap();
             CreateMap<Module, ModuleDto>().ForMember(dest => dest.EndDate,
                   from => from.MapFrom(c => c.StartDate.AddMonths(1))).ReverseMap();
         }

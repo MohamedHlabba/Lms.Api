@@ -17,8 +17,8 @@ namespace Lms.Api.Data
         //{
         //    base.OnModelCreating(builder);
 
-        //    //builder.Entity<Module>().HasKey(m => new { m.CourseId, m.Id});
-        //    builder.Entity<Course>().HasKey(c => new { c.Id, c.Modules });
+        //    builder.Entity<Module>().HasKey(m => new { m.CourseId, m.Id});
+        //    //builder.Entity<Course>().HasKey(c => new { c.Id, c.Modules });
         //}
 
         public DbSet<Course> Courses { get; set; }

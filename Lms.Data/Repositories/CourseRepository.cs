@@ -30,16 +30,20 @@ namespace Lms.Data.Repositories
                    await db.Courses.ToListAsync();
         }
 
-        public async Task<Course> GetCourse(int? id)
+        public async Task<Course> GetCourse(int id, bool includeModules)
         {
-            var query = db.Courses.Include(c => c.Modules)
+            var query = db.Courses
                  .AsQueryable();
+            if (includeModules)
+            {
+                query = query.Include(c => c.Modules);
+            }
             return await query.FirstOrDefaultAsync(c=>c.Id==id);
         }
 
         public async Task<bool> SaveAsync()
         {
-            return (await db.SaveChangesAsync() >= 0);
+            return (await db.SaveChangesAsync()) >= 0;
         }
     }
 }
