@@ -17,10 +17,10 @@ namespace Lms.Data.Data
         {
             using (var context = new ApplicationDbContext(services.GetRequiredService<DbContextOptions<ApplicationDbContext>>()))
             {
-                //if (context.Courses.Any())
-                //{
-                //    return;
-                //}
+                if (context.Courses.Any())
+                {
+                    return;
+                }
                 var fake = new Faker("sv");
 
                 var courses = new List<Course>();

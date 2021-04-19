@@ -50,6 +50,22 @@ namespace Lms.Data.Repositories
             }
             return await query.FirstOrDefaultAsync(c=>c.Id==id);
         }
+        public async Task<Course> GetCourse(int id)
+        {
+            var query = db.Courses
+                 .AsQueryable();
+            return await query.FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<IEnumerable<Course>> GetAllCourses(string title , bool includeModules)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return await GetAllCourses(false);
+            }
+            title = title.Trim();
+            return await db.Courses.Where(c => c.Title == title).ToListAsync(); 
+        }
 
         public async Task<bool> SaveAsync()
         {

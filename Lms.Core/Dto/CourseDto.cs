@@ -9,8 +9,6 @@ namespace Lms.Core.Dto
 {
     public class CourseDto
     {
-       // [DatabaseGenerated(DatabaseGeneratedOption.None)]
-
         public int Id { get; set; }
         public string Title { get; set; }
         public DateTime StartDate { get; set; }

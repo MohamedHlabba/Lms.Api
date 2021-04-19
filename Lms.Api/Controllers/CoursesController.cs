@@ -32,19 +32,17 @@ namespace Lms.Api.Controllers
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(bool includeModules = false)
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(string title,bool includeModules = false)
         {
-            var res = await uofwork.CourseRepository.GetAllCourses(includeModules);
+            var res = await uofwork.CourseRepository.GetAllCourses(title, includeModules);
             var courseDto = mapper.Map<IEnumerable<CourseDto>>(res);
             return Ok(courseDto);
         }
 
-        // GET: api/Courses/5
+       // GET: api/Courses/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CourseDto>> GetCourse(int id, bool includeModules = false)
+        public async Task<ActionResult<CourseDto>> GetCourse(int id, bool includeModules = true)
         {
-            if (string.IsNullOrEmpty(id.ToString())) return BadRequest();
-
             var result = await uofwork.CourseRepository.GetCourse(id, includeModules);
 
             if (result is null) return NotFound();
@@ -53,7 +51,6 @@ namespace Lms.Api.Controllers
 
             return Ok(dto);
         }
-
         // PUT: api/Courses/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

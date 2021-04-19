@@ -9,7 +9,6 @@ namespace Lms.Core.Dto
 {
     public class ModuleDto
     {
-       // [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Title { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

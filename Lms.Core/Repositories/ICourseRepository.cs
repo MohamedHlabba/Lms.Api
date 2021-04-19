@@ -10,7 +10,9 @@ namespace Lms.Core.Repositories
     public interface ICourseRepository
     {
         Task<IEnumerable<Course>> GetAllCourses(bool includeModules);
-        Task<Course> GetCourse(int Id, bool includeModules);
+        Task<IEnumerable<Course>> GetAllCourses(string title, bool includeModules);
+        Task<Course> GetCourse(int id, bool includeModules);
+        Task<Course> GetCourse(int id);
         Task<bool> SaveAsync();
         Task AddAsync<T>(T added);
         void DeleteAsync<T>(T removed);
