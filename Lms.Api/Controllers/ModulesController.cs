@@ -18,13 +18,11 @@ namespace Lms.Api.Controllers
     [ApiController]
     public class ModulesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IUnitOfwork uOfwork;
         private readonly IMapper mapper;
 
-        public ModulesController(ApplicationDbContext context, IUnitOfwork uOfwork, IMapper mapper)
+        public ModulesController( IUnitOfwork uOfwork, IMapper mapper)
         {
-            _context = context;
             this.uOfwork = uOfwork;
             this.mapper = mapper;
         }

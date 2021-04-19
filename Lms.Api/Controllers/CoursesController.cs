@@ -19,22 +19,20 @@ namespace Lms.Api.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IUnitOfwork uofwork;
         private readonly IMapper mapper;
 
-        public CoursesController(ApplicationDbContext context, IUnitOfwork uofwork, IMapper mapper)
+        public CoursesController( IUnitOfwork uofwork, IMapper mapper)
         {
-            _context = context;
             this.uofwork = uofwork;
             this.mapper = mapper;
         }
 
         // GET: api/Courses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(string title,bool includeModules = false)
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(string title, string searchQuery,bool includeModules = false)
         {
-            var res = await uofwork.CourseRepository.GetAllCourses(title, includeModules);
+            var res = await uofwork.CourseRepository.GetAllCourses(title, includeModules,searchQuery);
             var courseDto = mapper.Map<IEnumerable<CourseDto>>(res);
             return Ok(courseDto);
         }
