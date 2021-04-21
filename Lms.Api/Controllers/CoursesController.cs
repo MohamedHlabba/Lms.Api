@@ -12,6 +12,7 @@ using Lms.Data.Repositories;
 using AutoMapper;
 using Lms.Core.Dto;
 using Microsoft.AspNetCore.JsonPatch;
+using Lms.Api.ResourceParameters;
 
 namespace Lms.Api.Controllers
 {
@@ -29,10 +30,23 @@ namespace Lms.Api.Controllers
         }
 
         // GET: api/Courses
+        //[HttpGet]
+        //[HttpHead]
+        //public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses([FromQuery]string title, string searchQuery,bool includeModules)
+        //{
+        //    //throw new Exception("test exception");
+
+        //    var res = await uofwork.CourseRepository.GetAllCourses(title, includeModules,searchQuery);
+        //    var courseDto = mapper.Map<IEnumerable<CourseDto>>(res);
+        //    return Ok(courseDto);
+        //}
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses(string title, string searchQuery,bool includeModules = false)
+        [HttpHead]
+        public async Task<ActionResult<IEnumerable<CourseDto>>> GetAllCourses([FromQuery]CourseResourceParameters courseResourceParameters,bool includeModules)
         {
-            var res = await uofwork.CourseRepository.GetAllCourses(title, includeModules,searchQuery);
+            //throw new Exception("test exception");
+
+            var res = await uofwork.CourseRepository.GetAllCourses(courseResourceParameters, includeModules);
             var courseDto = mapper.Map<IEnumerable<CourseDto>>(res);
             return Ok(courseDto);
         }

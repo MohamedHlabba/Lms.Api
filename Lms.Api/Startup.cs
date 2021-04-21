@@ -16,6 +16,7 @@ using Lms.Api.Data;
 using Lms.Core.Repositories;
 using Lms.Data.Repositories;
 using Lms.Data;
+using Microsoft.AspNetCore.Http;
 
 namespace Lms.Api
 {
@@ -57,17 +58,27 @@ namespace Lms.Api
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lms.Api v1"));
             }
+            //else
+            //{
+            //    app.UseExceptionHandler(appBuilder =>
+            //    {
+            //        appBuilder.Run(async context =>
+            //        {
+            //            context.Response.StatusCode = 500;
+            //            await context.Response.WriteAsync("An unexpected fault happened.Try again later ");
+            //        });
+            //    });
 
-            app.UseHttpsRedirection();
+                app.UseHttpsRedirection();
 
-            app.UseRouting();
+                app.UseRouting();
 
-            app.UseAuthorization();
+                app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                });
+            }
         }
     }
-}

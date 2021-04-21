@@ -1,4 +1,5 @@
 ﻿using Lms.Api.Data;
+using Lms.Api.ResourceParameters;
 using Lms.Core.Entities;
 using Lms.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace Lms.Data.Repositories
             db.Remove(removed);
         }
 
-        public async Task<IEnumerable<Course>> GetAllCourses(bool includeModules)
+        public async Task<IEnumerable<Course>> GetAllCourses(bool includeModules= false)
         {
             return includeModules ? await db.Courses
                    .Include(c => c.Modules).ToListAsync() :
@@ -57,22 +58,22 @@ namespace Lms.Data.Repositories
             return await query.FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<IEnumerable<Course>> GetAllCourses(string title, bool includeModules, string searchQuery)
+        public async Task<IEnumerable<Course>> GetAllCourses(CourseResourceParameters courseResourceParameters, bool includeModules)
         {
-            if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(searchQuery))
+            if (string.IsNullOrWhiteSpace(courseResourceParameters.Title) && string.IsNullOrWhiteSpace(courseResourceParameters.SearchQuery))
             {
-                return await GetAllCourses(false);
+                return await GetAllCourses(includeModules);
             }
             var collection = db.Courses as IQueryable<Course>;
-            if (!string.IsNullOrWhiteSpace(title))
+            if (!string.IsNullOrWhiteSpace(courseResourceParameters.Title))
             {
-                title = title.Trim();
+               var  title = courseResourceParameters.Title.Trim();
                 collection =  collection.Where(c => c.Title == title);
 
             }
-            if (!string.IsNullOrWhiteSpace(searchQuery))
+            if (!string.IsNullOrWhiteSpace(courseResourceParameters.SearchQuery))
             {
-                searchQuery = searchQuery.Trim();
+               var searchQuery = courseResourceParameters.SearchQuery.Trim();
                 collection = collection.Where(c => c.Title.Contains(searchQuery)
                     ||c.StartDate.ToString().Contains(searchQuery));
             }

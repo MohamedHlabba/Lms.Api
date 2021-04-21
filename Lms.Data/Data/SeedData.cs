@@ -43,7 +43,6 @@ namespace Lms.Data.Data
                     {
                         Title = fake.Company.CatchPhrase(),
                         Course=course,
-                        //Course = fake.Random.ListItem<Course>(courses),
                         StartDate = DateTime.Now.AddDays(fake.Random.Int(-2, 2)),
 
                     };
