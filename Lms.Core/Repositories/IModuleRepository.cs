@@ -11,11 +11,17 @@ namespace Lms.Core.Repositories
     {
         Task<IEnumerable<Module>> GetAllModules();
         Module GetModuleForCourse(int id,string title);
+        Module GetModuleForCourse(int courseid, int id);
+
         Task<Module> GetModule(string title);
         Task<bool> SaveAsync();
         Task AddAsync<T>(T added);
+        void AddModule(int courseId, Module module);
+
         void DeleteAsync<T>(T removed);
         bool ModuleExists(int id);
+        bool CourseExists(int id);
+
 
     }
 }

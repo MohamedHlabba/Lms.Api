@@ -85,5 +85,14 @@ namespace Lms.Data.Repositories
         {
             return (await db.SaveChangesAsync()) >= 0;
         }
+
+        public void CreateCourse(Course course)
+        {
+            if (course is null)
+            {
+                throw new ArgumentNullException(nameof(course));
+            }
+            //the repository fills the id (instead of using identity columns)
+        }
     }
 }

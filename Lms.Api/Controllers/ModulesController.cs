@@ -14,7 +14,7 @@ using AutoMapper;
 
 namespace Lms.Api.Controllers
 {
-    [Route("api/courses/{CourseId}/modules")]
+    [Route("api/courses/{courseId}/modules")]
     [ApiController]
     public class ModulesController : ControllerBase
     {
@@ -36,35 +36,35 @@ namespace Lms.Api.Controllers
             return Ok(moduleDto);
         }
 
-       // GET: api/Modules/5
-        [HttpGet("{title}")]
-        public async Task<ActionResult<ModuleDto>> GetModule(string title)
-        {
-            if (string.IsNullOrEmpty(title)) return BadRequest();
-
-            var result = await uOfwork.ModuleRepository.GetModule(title);
-
-            if (result is null) return NotFound();
-
-            var dto = mapper.Map<ModuleDto>(result);
-
-            return Ok(dto);
-        }
+        // GET: api/Modules/5
         //[HttpGet("{title}")]
-        //public ActionResult<ModuleDto> GettModuleForCourse(int id, string title)
+        //public async Task<ActionResult<ModuleDto>> GetModule(string title)
         //{
-        //    if (!uOfwork.CourseRepository.CourseExists(id))
-        //    {
-        //        return StatusCode(404);
-        //    }
-        //    var ModuleForCourseFromRepo = uOfwork.ModuleRepository.GetModuleForCourse(id,title);
-        //    if (ModuleForCourseFromRepo is null)
-        //    {
+        //    if (string.IsNullOrEmpty(title)) return BadRequest();
 
-        //        return StatusCode(404);
-        //    }
-        //    return Ok(mapper.Map<ModuleDto>(ModuleForCourseFromRepo));
+        //    var result = await uOfwork.ModuleRepository.GetModule(title);
+
+        //    if (result is null) return NotFound();
+
+        //    var dto = mapper.Map<ModuleDto>(result);
+
+        //    return Ok(dto);
         //}
+        [HttpGet("{title}", Name = "GetModuleForCourse")]
+        public ActionResult<ModuleDto> GettModuleForCourse(int courseId, string title)
+        {
+            if (!uOfwork.ModuleRepository.CourseExists(courseId))
+            {
+                return StatusCode(404);
+            }
+            var ModuleForCourseFromRepo = uOfwork.ModuleRepository.GetModuleForCourse(courseId, title);
+            if (ModuleForCourseFromRepo is null)
+            {
+
+                return StatusCode(404);
+            }
+            return Ok(mapper.Map<ModuleDto>(ModuleForCourseFromRepo));
+        }
 
         // PUT: api/Modules/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -90,26 +90,42 @@ namespace Lms.Api.Controllers
 
         // POST: api/Modules
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<ModuleDto>> PostModule(ModuleDto dto)
+        //{
+        //    if (await uOfwork.ModuleRepository.GetModule(dto.Title) != null)
+        //    {
+        //        ModelState.AddModelError("Title", "Module is  in use");
+        //        return BadRequest(ModelState);
+        //    }
+        //    var module = mapper.Map<Module>(dto);
+        //    await uOfwork.ModuleRepository.AddAsync(module);
+        //    if (await uOfwork.ModuleRepository.SaveAsync())
+        //    {
+        //        var model = mapper.Map<ModuleDto>(module);
+        //        return CreatedAtAction(nameof(GetModule), new { courseId = model.CourseId, title = model.Title }, model);
+        //    }
+        //    else
+        //    {
+        //        return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        //    }
+        //}
         [HttpPost]
-        public async Task<ActionResult<ModuleDto>> PostModule(ModuleDto dto)
+        public ActionResult<ModuleDto> CreateModuleForCourse(int courseId, ModuleForCreationDto module)
         {
-            if (await uOfwork.ModuleRepository.GetModule(dto.Title) != null)
+            if (!uOfwork.ModuleRepository.CourseExists(courseId))
             {
-                ModelState.AddModelError("Title", "Module is  in use");
-                return BadRequest(ModelState);
+                return NotFound();
+
             }
-            var module = mapper.Map<Module>(dto);
-            await uOfwork.ModuleRepository.AddAsync(module);
-            if (await uOfwork.ModuleRepository.SaveAsync())
-            {
-                var model = mapper.Map<ModuleDto>(module);
-                return CreatedAtAction(nameof(GetModule), new { courseId=model.CourseId, title = model.Title }, model);
-            }
-            else
-            {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
+            var moduleEntity = mapper.Map<Module>(module);
+             uOfwork.ModuleRepository.AddModule(courseId, moduleEntity);
+            uOfwork.ModuleRepository.SaveAsync();
+            var moduleToreturn = mapper.Map<ModuleDto>(moduleEntity);
+            return CreatedAtAction(nameof(GettModuleForCourse), new { courseId= courseId, title=moduleToreturn.Title }, moduleToreturn);
+
         }
+
 
         // DELETE: api/Modules/5
         [HttpDelete("{title}")]

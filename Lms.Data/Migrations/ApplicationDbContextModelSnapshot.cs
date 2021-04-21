@@ -22,7 +22,9 @@ namespace Lms.Data.Migrations
             modelBuilder.Entity("Lms.Core.Entities.Course", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
